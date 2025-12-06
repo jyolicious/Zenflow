@@ -32,7 +32,7 @@ export default function Home(){
               Start Your Practice
             </Link>
             <Link 
-              to="/contact" 
+              to="/book-trial" 
               className="px-12 py-5 bg-white/20 backdrop-blur-sm text-white text-xl font-semibold rounded-full border-2 border-white hover:bg-white/30 transform hover:scale-105 transition-all duration-300"
             >
               Book Free Trial
@@ -108,7 +108,7 @@ export default function Home(){
             </Link>
 
             {/* Book Trial */}
-            <Link to="/Contact" className="group relative h-80 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
+            <Link to="/book-trial" className="group relative h-80 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
               <img 
                 src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80" 
                 alt="Book Trial" 
@@ -164,10 +164,10 @@ export default function Home(){
       {/* Inspiration Quote Section */}
       <section className="py-32 px-6 bg-gradient-to-br from-teal-600 to-purple-600 text-white">
         <div className="max-w-4xl mx-auto text-center">
-          <blockquote className="text-4xl md:text-5xl font-light mb-8">
-            "Yoga is the journey of the self, through the self, to the self."
+          <blockquote className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+            “When the mind becomes still, the soul begins to speak.”
           </blockquote>
-          <p className="text-2xl opacity-90">— The Bhagavad Gita</p>
+          <p className="text-xl opacity-90 font-medium">— Bhagavad Gita</p>
         </div>
       </section>
 
@@ -181,7 +181,7 @@ export default function Home(){
             Join thousands finding balance, strength, and peace through yoga.
           </p>
           <Link 
-            to="/contact" 
+            to="/book-trial" 
             className="inline-block px-16 py-6 bg-gradient-to-r from-teal-500 to-teal-600 text-white text-2xl font-semibold rounded-full hover:from-teal-600 hover:to-teal-700 transform hover:scale-105 transition-all duration-300 shadow-2xl"
           >
             Book Your Free Trial Class
