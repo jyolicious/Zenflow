@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import api from '../api/axios'
-import { Search, Youtube, Loader2, Filter, X } from 'lucide-react'
+import { Search, Loader2, Filter, X, Maximize2 } from 'lucide-react'
 
 export default function Asanas() {
   const [items, setItems] = useState([])
@@ -8,6 +8,10 @@ export default function Asanas() {
   const [loading, setLoading] = useState(false)
   const [selectedTag, setSelectedTag] = useState('')
   const [error, setError] = useState('')
+
+  // modal state
+  const [modalOpen, setModalOpen] = useState(false)
+  const [activeAsana, setActiveAsana] = useState(null)
 
   const quickTags = [
     { label: 'Stress Relief', value: 'stress', color: 'bg-blue-100 text-blue-700 hover:bg-blue-200' },
@@ -28,7 +32,6 @@ export default function Asanas() {
         params: qparam ? { q: qparam } : {}
       })
 
-      // Backend returns: { meta:{}, data:[...] } OR just [...]
       const payload = res.data
       const list = Array.isArray(payload)
         ? payload
@@ -80,6 +83,43 @@ export default function Asanas() {
 
   const handleKeyPress = (e) => {
     if (e.key === 'Enter') handleSearch()
+  }
+
+  // ---------- Modal helpers ----------
+  const openModal = (asana) => {
+    setActiveAsana(asana)
+    setModalOpen(true)
+  }
+
+  const closeModal = () => {
+    setModalOpen(false)
+    // small timeout to clear active after closing animation (optional)
+    setTimeout(() => setActiveAsana(null), 200)
+  }
+
+  // close modal on Escape
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === 'Escape' && modalOpen) closeModal()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [modalOpen])
+
+  // disable body scroll when modal open
+  useEffect(() => {
+    if (modalOpen) {
+      document.documentElement.classList.add('overflow-hidden')
+    } else {
+      document.documentElement.classList.remove('overflow-hidden')
+    }
+  }, [modalOpen])
+
+  // limit to ~50 words
+  const truncateWords = (text = '', limit = 50) => {
+    const words = text.split(/\s+/).filter(Boolean)
+    if (words.length <= limit) return text
+    return words.slice(0, limit).join(' ') + '...'
   }
 
   return (
@@ -183,11 +223,6 @@ export default function Asanas() {
         {!loading && items.length > 0 && (
           <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
             {items.map(it => {
-              // debug each object (comment out or remove in production)
-              console.log("ASANA OBJ →", it)
-              console.log("ASANA TAGS", it._id, it.tags, typeof it.tags, Array.isArray(it.tags))
-
-              // Defensive tags handling (should be array thanks to normalization above)
               const tagsArray = Array.isArray(it.tags)
                 ? it.tags
                 : (typeof it.tags === 'string'
@@ -197,6 +232,7 @@ export default function Asanas() {
               return (
                 <div 
                   key={it._id} 
+                  onClick={() => openModal(it)}
                   className="bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 
                  overflow-hidden group cursor-pointer border border-gray-100"
                 >
@@ -208,11 +244,11 @@ export default function Asanas() {
                       className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                     />
 
-                    {it.youtube_url && (
-                      <div className="absolute top-3 right-3 bg-red-600 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Youtube className="w-5 h-5 text-white" />
-                      </div>
-                    )}
+                    {/* Maximize icon for opening modal */}
+                    <div className="absolute top-3 right-3 bg-white/80 p-2 rounded-full opacity-90 shadow-sm hover:scale-105 transition-transform"
+                         onClick={(e) => { e.stopPropagation(); openModal(it) }}>
+                      <Maximize2 className="w-5 h-5 text-gray-700" />
+                    </div>
                   </div>
 
                   {/* Card Content */}
@@ -244,7 +280,10 @@ export default function Asanas() {
                         className="inline-flex items-center gap-2 text-teal-600 hover:text-teal-700 font-semibold text-sm"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        <Youtube className="w-4 h-4" />
+                        {/* keep icon small and text */}
+                        <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                          <path d="M10 8.64L15.27 12 10 15.36V8.64z" />
+                        </svg>
                         Watch Video →
                       </a>
                     )}
@@ -253,7 +292,6 @@ export default function Asanas() {
               )
             })}
           </div>
-
         )}
 
         {/* Empty */}
@@ -270,6 +308,85 @@ export default function Asanas() {
           </div>
         )}
       </div>
+
+      {/* -------- Modal Overlay (glass) -------- */}
+      {modalOpen && activeAsana && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center px-4 py-8"
+          aria-modal="true"
+          role="dialog"
+          onClick={closeModal}
+        >
+          {/* backdrop */}
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity" />
+
+          {/* modal card */}
+          <div
+            className="relative z-10 max-w-5xl w-full bg-white/30 backdrop-blur-xl border border-white/40 rounded-2xl shadow-2xl overflow-hidden
+                        flex flex-col md:flex-row gap-0"
+            onClick={(e) => e.stopPropagation()}
+            role="document"
+          >
+            {/* close button */}
+            <button
+              onClick={closeModal}
+              className="absolute top-4 right-4 bg-white/40 hover:bg-white/60 p-2 rounded-full z-20"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5 text-gray-800" />
+            </button>
+
+            {/* Left: image */}
+            <div className="md:w-1/2 w-full h-64 md:h-auto relative">
+              <img
+                src={activeAsana.photo_url || 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=900&h=700&fit=crop'}
+                alt={activeAsana.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* Right: content */}
+            <div className="md:w-1/2 w-full p-6 flex flex-col justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900 mb-3">{activeAsana.name}</h2>
+
+                <p className="text-gray-800 text-sm leading-relaxed mb-4">
+                  {truncateWords(activeAsana.description || 'No description available.', 50)}
+                </p>
+
+                {Array.isArray(activeAsana.tags) && activeAsana.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {activeAsana.tags.map((t, i) => (
+                      <span key={i} className="px-3 py-1 bg-white/30 border border-white/40 rounded-full text-xs text-gray-800">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-4">
+                {activeAsana.youtube_url ? (
+                  <a
+                    href={activeAsana.youtube_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-3 px-4 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+                      <path d="M10 8.64L15.27 12 10 15.36V8.64z" />
+                    </svg>
+                    Open YouTube Video
+                  </a>
+                ) : (
+                  <div className="text-sm text-gray-700 italic">No video available for this asana.</div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
