@@ -1,0 +1,70 @@
+# ===========================
+# Node / Backend
+# ===========================
+backend/node_modules/
+backend/package-lock.json
+backend/.env
+backend/.env.local
+backend/.env.development.local
+backend/.env.production.local
+
+# Logs
+backend/npm-debug.log*
+backend/yarn-debug.log*
+backend/yarn-error.log*
+backend/debug.log
+backend/logs/
+
+# Coverage / builds
+backend/coverage/
+backend/dist/
+
+
+# ===========================
+# React / Vite Frontend
+# ===========================
+frontend/node_modules/
+frontend/package-lock.json
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+frontend/.env.development
+frontend/.env.test
+frontend/.env*.local
+
+# Vite output
+frontend/dist/
+frontend/.vite/
+
+# Logs
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/logs/
+
+
+# ===========================
+# Global / System ignores
+# ===========================
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.swp
+*.cache
+*.bak
+*.orig
+*.old
+
+# dotenv
+.env
+.env.local
+.env.development
+.env.production
+.env.test
+
+# ===========================
+# Optional: VS Code files
+# ===========================
+.vscode/
+*.code-workspace
