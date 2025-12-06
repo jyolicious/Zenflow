@@ -1,7 +1,8 @@
 // seed-asanas.js
 // Run: node seed-asanas.js
 // Inserts 50 asanas into the "asanas" collection (clears existing ones first).
-// Uses a curated list of YouTube links (short tutorials) and Option-3 tags.
+// photo_url is set to the exact asana name + ".jpg" so filenames must exactly match.
+// Adds a pose-specific `message` field and `tags_array`. Keeps `tags` string for text index.
 
 const { MongoClient } = require('mongodb')
 
@@ -11,7 +12,7 @@ const asanaNames = [
   "Tadasana (Mountain Pose)","Vrikshasana (Tree Pose)","Adho Mukha Svanasana (Downward Dog)",
   "Bhujangasana (Cobra Pose)","Balasana (Child's Pose)","Setu Bandha Sarvangasana (Bridge Pose)",
   "Ardha Matsyendrasana (Half Lord of the Fishes)","Trikonasana (Triangle Pose)","Virabhadrasana I (Warrior I)",
-  "Virabhadrasana II (Warrior II)","Uttanasana (Standing Forward Bend)","Baddha Konasana (Bound Angle)",
+  "Virabhadrasana II (Warrior II)","Uttanasana (Standing Forward Bend)","Baddha Konasana (Bound Angle Pose)",
   "Paschimottanasana (Seated Forward Bend)","Dhanurasana (Bow Pose)","Ustrasana (Camel Pose)",
   "Salamba Sarvangasana (Supported Shoulderstand)","Halasana (Plow Pose)","Navasana (Boat Pose)",
   "Marjaryasana-Bitilasana (Cat-Cow)","Ananda Balasana (Happy Baby)","Savasana (Corpse Pose)",
@@ -26,7 +27,7 @@ const asanaNames = [
   "Sukhasana (Easy Pose)","Vajrasana (Thunderbolt Pose)","Shirshasana (Headstand)"
 ]
 
-// curated YouTube links (50). These are the links I provided earlier.
+// curated YouTube links (copied from your input)
 const youtubeLinks = {
   "Tadasana (Mountain Pose)": "https://youtu.be/9eNMoDT2I-k?si=ZDg6YOB1rzV4Q3tV",
   "Vrikshasana (Tree Pose)": "https://youtu.be/fIF016JROiA?si=MxqqDC3lq0RvBR9D",
@@ -77,7 +78,7 @@ const youtubeLinks = {
   "Shirshasana (Headstand)": "https://youtu.be/emb0xwvZ7HM?si=KJd9JqApSLQCFfE4"
 }
 
-// tag mapping (Option 3 mix) normalized to quick tags
+// tag mapping (copied from your input)
 const tagMapping = {
   "Tadasana (Mountain Pose)": ["general","focus"],
   "Vrikshasana (Tree Pose)": ["focus","balance"],
@@ -138,6 +139,82 @@ function normalizeTags(arr){
     if(lower.includes('focus') || lower.includes('balance')) return 'focus'
     if(lower.includes('depress') || lower.includes('mood')) return 'depression'
     if(lower.includes('peace')) return 'peaceful'
+    if(lower.includes('flexibility')) return 'flexibility'
+    if(lower.includes('strength')) return 'strength'
+    return 'general'
+  })))
+}
+
+function getTagsFor(name){
+  const t = tagMapping[name]
+  if(Array.isArray(t)) return normalizeTags(t)
+  return ['general']
+}
+
+// pose-specific messages mapping (one entry per asana)
+const messages = {
+  "Tadasana (Mountain Pose)": "Tadasana builds a steady foundation — stand tall, root through your feet and lengthen the spine. Use it to check alignment and establish mindful breathing.",
+  "Vrikshasana (Tree Pose)": "Vrikshasana improves balance and focus. Ground one foot, press through the standing leg and lift through the chest to cultivate steadiness.",
+  "Adho Mukha Svanasana (Downward Dog)": "Downward Dog stretches the entire back line and energizes the body. Press hips up and back while breathing smoothly for spine length.",
+  "Bhujangasana (Cobra Pose)": "Bhujangasana gently opens the chest and strengthens the back. Use as a mild backbend — lift with the upper back, not the neck.",
+  "Balasana (Child's Pose)": "Balasana is a restful forward fold; relax the forehead to the mat and breathe deeply to relieve tension and calm the nervous system.",
+  "Setu Bandha Sarvangasana (Bridge Pose)": "Bridge strengthens the glutes and gently opens the chest. Press through feet and lift hips while keeping a long neck.",
+  "Ardha Matsyendrasana (Half Lord of the Fishes)": "A seated twist to improve spinal mobility and aid digestion. Sit tall, rotate from the thoracic spine and breathe into the twist.",
+  "Trikonasana (Triangle Pose)": "Triangle pose lengthens the sides of the body and improves balance. Keep both legs strong and reach through the crown for length.",
+  "Virabhadrasana I (Warrior I)": "Warrior I builds strength and focus — front knee over ankle, back leg active, lift the arms for an energizing standing posture.",
+  "Virabhadrasana II (Warrior II)": "Warrior II stabilizes and opens the hips; broaden the collarbones and gaze over the front hand to cultivate stamina.",
+  "Uttanasana (Standing Forward Bend)": "Uttanasana releases the hamstrings and soothes the nervous system — fold from the hips and soften the neck.",
+  "Baddha Konasana (Bound Angle Pose)": "Bound Angle gently opens the inner thighs and hips; sit tall and lean forward only as far as comfortable.",
+  "Paschimottanasana (Seated Forward Bend)": "Seated forward fold stretches the back of the body and calms the mind — hinge at the hips and breathe into the stretch.",
+  "Dhanurasana (Bow Pose)": "Bow pose opens the chest and strengthens the back and legs — lift through the sternum while keeping the neck long.",
+  "Ustrasana (Camel Pose)": "Camel is a heart-opening backbend; support the lower back with engagement and avoid compressing the neck.",
+  "Salamba Sarvangasana (Supported Shoulderstand)": "Supported shoulderstand encourages circulation and calm — use core support and avoid if you have neck issues without guidance.",
+  "Halasana (Plow Pose)": "Plow pose deeply stretches the back and shoulders — move slowly, keep the neck long, and exit carefully.",
+  "Navasana (Boat Pose)": "Boat builds core strength and balance; keep the spine long and lift the chest to maintain steady breath.",
+  "Marjaryasana-Bitilasana (Cat-Cow)": "Cat-Cow mobilizes the spine and warms the body; synchronize movement with breath for full benefit.",
+  "Ananda Balasana (Happy Baby)": "Happy Baby gently opens the hips and provides a playful stretch; hold the feet and draw knees toward the armpits.",
+  "Savasana (Corpse Pose)": "Savasana is deep restorative rest — lie still, soften the breath, and allow the body to integrate the practice.",
+  "Gomukhasana (Cow Face Pose)": "Cow Face opens shoulders and hips; work within a comfortable range and use a strap if the hands can't meet.",
+  "Utkatasana (Chair Pose)": "Chair pose strengthens the legs and core while building heat — sit back into an imaginary chair and lift through the chest.",
+  "Padmasana (Lotus Pose)": "Lotus supports meditative posture and hip opening — approach gradually and use variations if knees feel sensitive.",
+  "Ardha Chandrasana (Half Moon)": "Half Moon improves balance and side-body strength; keep a soft micro-bend in the standing leg and lift through the torso.",
+  "Janu Sirsasana (Head-to-Knee Forward Bend)": "A calming seated stretch for the hamstring and back; hinge from the hip and breathe into the release.",
+  "Supta Baddha Konasana (Reclined Bound Angle)": "Reclined bound angle is restful and opens the hips; support the knees with props and relax the belly.",
+  "Prasarita Padottanasana (Wide-Legged Forward Bend)": "Wide-legged fold lengthens the spine and hamstrings; anchor the feet and fold with a long spine.",
+  "Upavistha Konasana (Wide-Angle Seated Forward Bend)": "Wide-angle forward bend stretches the inner legs and back; move slowly and keep the breath even.",
+  "Parivrtta Trikonasana (Revolved Triangle)": "Revolved triangle is a twisting standing pose that strengthens and detoxifies; rotate from the torso, not the neck.",
+  "Salabhasana (Locust Pose)": "Locust strengthens the back body and supports posture — lift with the upper back and glutes while breathing steadily.",
+  "Viparita Karani (Legs-Up-The-Wall)": "Legs-up-the-wall restores circulation and calms the mind — lie with hips close to the wall and relax for several minutes.",
+  "Urdhva Mukha Svanasana (Upward-Facing Dog)": "Upward dog opens the chest and strengthens arms and spine; press through hands and roll the shoulders back.",
+  "Tittibhasana (Firefly Pose)": "Firefly is an advanced arm balance that challenges strength and flexibility — warm up hips and hamstrings thoroughly first.",
+  "Pincha Mayurasana (Forearm Balance)": "Forearm balance improves shoulder strength and balance; practice near a wall until comfortable holding the pose.",
+  "Bakasana (Crow Pose)": "Crow builds arm strength and confidence — engage the core and find a steady gaze to balance.",
+  "Natarajasana (Dancer Pose)": "Dancer improves balance, backbend and hip flexibility; keep weight in the standing foot and lift from the chest.",
+  "Chaturanga Dandasana (Four-Limbed Staff Pose)": "Chaturanga strengthens the core, arms and shoulders — maintain a straight line from head to heels with control.",
+  "Ardha Uttanasana (Half Forward Fold)": "Half forward fold lengthens the spine and prepares deeper forward folds — keep the back flat and chest open.",
+  "Malasana (Garland Pose)": "Garland pose opens the hips and groin while strengthening the legs — keep the spine long and chest lifted.",
+  "Krounchasana (Heron Pose)": "Heron stretches the hamstrings deeply in a seated posture; support the knee if needed and maintain even breath.",
+  "Kapalabhati Breath (Technique)": "Kapalabhati is a cleansing breath that invigorates the body — use short, forceful exhalations with passive inhalations.",
+  "Bhramari (Bee Breath)": "Bhramari calms the nervous system by producing soothing vibrations — cover the ears and hum on exhale for several rounds.",
+  "Anulom Vilom (Alternate Nostril Breath)": "Alternate nostril breathing balances the hemispheres and prepares the mind for practice; keep breaths gentle and even.",
+  "Sukhasana (Easy Pose)": "Easy pose is a simple seated posture for breathwork and meditation — sit tall, relax the shoulders and soften the gaze.",
+  "Vajrasana (Thunderbolt Pose)": "Vajrasana is a grounding seated pose ideal after meals or for meditation; keep the spine upright and breathe slowly.",
+  "Shirshasana (Headstand)": "Headstand increases circulation and builds core stability — practice only with preparation and avoid with neck or blood pressure issues."
+}
+
+// Keep getTagsFor / normalizeTags from earlier to compute tags
+function normalizeTags(arr){
+  if(!Array.isArray(arr)) return ['general']
+  return Array.from(new Set(arr.map(t=>{
+    const lower = String(t).toLowerCase()
+    if(lower.includes('sleep')) return 'sleep'
+    if(lower.includes('stress') || lower.includes('relax') || lower.includes('calm')) return 'stress'
+    if(lower.includes('energy') || lower.includes('vitality')) return 'energy'
+    if(lower.includes('focus') || lower.includes('balance')) return 'focus'
+    if(lower.includes('depress') || lower.includes('mood')) return 'depression'
+    if(lower.includes('peace')) return 'peaceful'
+    if(lower.includes('flexibility')) return 'flexibility'
+    if(lower.includes('strength')) return 'strength'
     return 'general'
   })))
 }
@@ -158,18 +235,24 @@ async function main(){
     console.log('Clearing existing asanas collection (if any)...')
     await coll.deleteMany({})
 
-    const docs = asanaNames.map((nm, i) => ({
-      name: nm,
-      description: `${nm} — gentle practice to improve flexibility and well-being. Practice mindfully.`,
-      tags: getTagsFor(nm).join(' '), // convert to single string for text index compatibility
-      photo_url: 'nm.jpg',
-      youtube_url: youtubeLinks[nm] || null,
-      created_at: new Date()
-    }))
+    const docs = asanaNames.map((nm) => {
+      const tagsArr = getTagsFor(nm)
+      return {
+        name: nm,
+        description: `${nm} — gentle practice to improve flexibility and well-being. Practice mindfully.`,
+        message: messages[nm] || `${nm} — practice mindfully and honor your limits.`,
+        tags: tagsArr.join(' '), // single string for text index
+        tags_array: tagsArr,
+        // photo_url exactly matches the asana name + .jpg
+        photo_url: `${nm}.jpg`,
+        youtube_url: youtubeLinks[nm] || null,
+        created_at: new Date()
+      }
+    })
 
     const res = await coll.insertMany(docs)
     console.log('Inserted', res.insertedCount, 'asanas.')
-    console.log('Done. Put images in frontend/public/assets/ named asana_1.jpg ... asana_50.jpg or modify photo_url fields.')
+    console.log('Done. Ensure image files are present and named exactly as the asana names + ".jpg".')
   } catch (err){
     console.error('Error seeding asanas:', err)
   } finally {

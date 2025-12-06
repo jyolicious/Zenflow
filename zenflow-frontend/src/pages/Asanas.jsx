@@ -256,7 +256,7 @@ export default function Asanas() {
                     <h3 className="text-lg font-bold text-gray-800 mb-2">{it.name}</h3>
 
                     <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                      {it.description}
+                      {it.message}
                     </p>
 
                     {tagsArray.length > 0 && (
@@ -351,7 +351,7 @@ export default function Asanas() {
                 <h2 className="text-2xl font-bold text-gray-900 mb-3">{activeAsana.name}</h2>
 
                 <p className="text-gray-800 text-sm leading-relaxed mb-4">
-                  {truncateWords(activeAsana.description || 'No description available.', 50)}
+                  {truncateWords(activeAsana.message || activeAsana.description, 50)}
                 </p>
 
                 {Array.isArray(activeAsana.tags) && activeAsana.tags.length > 0 && (
