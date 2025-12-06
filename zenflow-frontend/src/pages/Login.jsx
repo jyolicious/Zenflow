@@ -50,7 +50,7 @@ export default function Login(){
                type="email" placeholder="Email" className="w-full border px-3 py-2 rounded" />
         <input required value={form.password} onChange={e=>setForm({...form,password:e.target.value})}
                type="password" placeholder="Password" className="w-full border px-3 py-2 rounded" />
-        <button type="submit" disabled={loading} className="w-full bg-primary text-white py-2 rounded">
+        <button type="submit" disabled={loading} className="w-full bg-primary text-black py-2 rounded">
           {loading ? 'Logging in…' : 'Login'}
         </button>
       </form>
