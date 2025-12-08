@@ -32,7 +32,7 @@ export default function Home(){
               Start Your Practice
             </Link>
             <Link 
-              to="/book-trial" 
+              to="/contact" 
               className="px-12 py-5 bg-white/20 backdrop-blur-sm text-white text-xl font-semibold rounded-full border-2 border-white hover:bg-white/30 transform hover:scale-105 transition-all duration-300"
             >
               Book Free Trial
@@ -108,7 +108,7 @@ export default function Home(){
             </Link>
 
             {/* Book Trial */}
-            <Link to="/book-trial" className="group relative h-80 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
+            <Link to="/contact" className="group relative h-80 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
               <img 
                 src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80" 
                 alt="Book Trial" 
@@ -181,7 +181,7 @@ export default function Home(){
             Join thousands finding balance, strength, and peace through yoga.
           </p>
           <Link 
-            to="/book-trial" 
+            to="/contact" 
             className="inline-block px-16 py-6 bg-gradient-to-r from-teal-500 to-teal-600 text-white text-2xl font-semibold rounded-full hover:from-teal-600 hover:to-teal-700 transform hover:scale-105 transition-all duration-300 shadow-2xl"
           >
             Book Your Free Trial Class
