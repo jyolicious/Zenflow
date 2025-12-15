@@ -1,11 +1,15 @@
-const mongoose = require('mongoose');
+// models/Instructor.js
+import mongoose from "mongoose";
 
-const CenterSchema = new mongoose.Schema({
-  name: String,
-  address: String,
-  lat: Number,
-  lng: Number
-}, { _id: false });
+const CenterSchema = new mongoose.Schema(
+  {
+    name: String,
+    address: String,
+    lat: Number,
+    lng: Number,
+  },
+  { _id: false }
+);
 
 const InstructorSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -16,7 +20,7 @@ const InstructorSchema = new mongoose.Schema({
   phone: String,
   centers: [CenterSchema],
   social_links: { type: Map, of: String },
-  created_at: { type: Date, default: Date.now }
+  created_at: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model('Instructor', InstructorSchema);
+export default mongoose.model("Instructor", InstructorSchema);

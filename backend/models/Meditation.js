@@ -1,4 +1,5 @@
-const mongoose = require('mongoose');
+// models/Meditation.js
+import mongoose from "mongoose";
 
 const MeditationSchema = new mongoose.Schema({
   name: { type: String, required: true },
@@ -7,7 +8,7 @@ const MeditationSchema = new mongoose.Schema({
   video_url: { type: String },
   tags: { type: [String], index: true },
   duration_minutes: { type: Number },
-  created_at: { type: Date, default: Date.now }
+  created_at: { type: Date, default: Date.now },
 });
 
-module.exports = mongoose.model('Meditation', MeditationSchema);
+export default mongoose.model("Meditation", MeditationSchema);

@@ -1,7 +1,13 @@
-const dns = require('dns').promises;
-const disposableDomains = new Set([
-  // small sample - you can extend this list or use a service
-  'mailinator.com','10minutemail.com','tempmail.com','trashmail.com','guerrillamail.com'
+// utils/emailHelpers.js
+import { promises as dns } from "dns";
+
+export const disposableDomains = new Set([
+  // small sample – extend as needed or replace with a service
+  "mailinator.com",
+  "10minutemail.com",
+  "tempmail.com",
+  "trashmail.com",
+  "guerrillamail.com",
 ]);
 
 /**
@@ -9,17 +15,16 @@ const disposableDomains = new Set([
  * @param {string} email
  * @returns {Promise<boolean>}
  */
-async function hasMX(email) {
+export async function hasMX(email) {
   try {
-    const domain = email.split('@')[1].toLowerCase();
+    const domain = email.split("@")[1]?.toLowerCase();
     if (!domain) return false;
     if (disposableDomains.has(domain)) return false;
+
     const records = await dns.resolveMx(domain);
     return Array.isArray(records) && records.length > 0;
-  } catch (err) {
-    // domain likely doesn't exist or no MX records
+  } catch {
+    // domain likely doesn't exist or has no MX records
     return false;
   }
 }
-
-module.exports = { hasMX, disposableDomains };

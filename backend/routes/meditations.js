@@ -1,25 +1,32 @@
-const express = require('express');
-const Meditation = require('../models/Meditation');
+// routes/meditations.js
+import express from "express";
+import Meditation from "../models/Meditation.js";
+
 const router = express.Router();
 
-router.get('/', async (req, res) => {
+// GET /api/meditations?q=search
+router.get("/", async (req, res) => {
   try {
     const q = req.query.q;
     let filter = {};
+
     if (q) {
+      const re = new RegExp(q, "i");
       filter.$or = [
-        { name: new RegExp(q, 'i') },
-        { description: new RegExp(q, 'i') },
-        { tags: new RegExp(q, 'i') }
+        { name: re },
+        { description: re },
+        { tags: re },
       ];
     }
+
     const items = await Meditation.find(filter).limit(100).lean();
     res.json(items);
   } catch (err) {
-    res.status(500).json({ error: 'Server error' });
+    console.error("GET /api/meditations error", err);
+    res.status(500).json({ error: "Server error" });
   }
 });
 
-// other CRUD routes resemble Asana routes (POST/PUT/DELETE)...
+// POST / PUT / DELETE routes can follow the same pattern as Asanas
 
-module.exports = router;
+export default router;
