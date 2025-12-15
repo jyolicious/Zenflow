@@ -9,9 +9,9 @@ router.get("/yoga", async (req, res) => {
       "https://newsapi.org/v2/everything",
       {
         params: {
-          q: "yoga OR meditation",
           language: "en",
           sortBy: "publishedAt",
+          q: "yoga OR meditation OR mindfulness OR mental health OR wellness OR pranayama OR breathing OR stress",
           pageSize: 20,
           apiKey: process.env.NEWS_API_KEY,
         },
