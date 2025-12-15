@@ -1,23 +1,82 @@
-import React, { useEffect, useState } from 'react'
-import api from '../api/axios'
+// src/pages/News.jsx
+import React, { useEffect, useState } from "react";
+import api from "../api/axios";
 
-export default function News(){
-  const [items, setItems] = useState([])
+export default function News() {
+  const [articles, setArticles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  useEffect(()=>{ api.get('/news').then(r=>setItems(r.data || [])) }, [])
+  useEffect(() => {
+    async function fetchNews() {
+      try {
+        const res = await api.get("/news/yoga");
+        console.log("NEWS FROM BACKEND:", res.data); // ✅ verify data
+        setArticles(res.data || []);
+      } catch (err) {
+        console.error("News fetch error:", err);
+        setError("Failed to load news");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchNews();
+  }, []);
+
+  if (loading) {
+    return (
+      <div style={{ padding: "24px" }}>
+        <h2>Yoga & Health News</h2>
+        <p>Loading news...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ padding: "24px" }}>
+        <h2>Yoga & Health News</h2>
+        <p>{error}</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8">
-      <h2 className="text-2xl font-semibold mb-4">Yoga & Health News</h2>
-      <div className="grid gap-4 grid-cols-1 md:grid-cols-3">
-        {items.map(n=>(
-          <a key={n._id || n.url} href={n.url || '#'} target="_blank" rel="noreferrer" className="border rounded p-4 hover:shadow">
-            <h3 className="font-semibold">{n.title}</h3>
-            <p className="text-sm text-gray-600">{n.summary || n.description}</p>
-            <div className="text-xs mt-2 text-gray-500">{n.source || n.source?.name}</div>
-          </a>
-        ))}
-      </div>
+    <div style={{ padding: "24px", maxWidth: "1000px", margin: "0 auto" }}>
+      <h2>Yoga & Health News</h2>
+
+      {articles.length === 0 && (
+        <p>No news available at the moment.</p>
+      )}
+
+      {/* TEMPORARY RENDER — will be replaced by horizontal UI */}
+      {articles.map((item, index) => (
+        <div
+          key={index}
+          style={{
+            borderBottom: "1px solid #ddd",
+            padding: "12px 0",
+          }}
+        >
+          <h4 style={{ marginBottom: "6px" }}>
+            {item.title || "Untitled"}
+          </h4>
+
+          {item.description && (
+            <p style={{ color: "#555" }}>
+              {item.description}
+            </p>
+          )}
+
+          <small style={{ color: "#888" }}>
+            {item.source?.name || "Unknown source"} •{" "}
+            {item.publishedAt
+              ? new Date(item.publishedAt).toLocaleDateString()
+              : ""}
+          </small>
+        </div>
+      ))}
     </div>
-  )
+  );
 }
