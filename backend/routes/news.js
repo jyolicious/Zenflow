@@ -11,7 +11,7 @@ router.get("/yoga", async (req, res) => {
         params: {
           language: "en",
           sortBy: "publishedAt",
-          q: "yoga OR meditation OR mindfulness OR mental health OR wellness OR pranayama OR breathing OR stress",
+          q: "yoga OR meditation OR pranayama OR breathwork OR mindfulness OR asana ",
           pageSize: 20,
           apiKey: process.env.NEWS_API_KEY,
         },

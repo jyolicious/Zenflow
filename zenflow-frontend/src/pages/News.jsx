@@ -1,39 +1,158 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import api from "../api/axios";
+import { Search, Loader2, Filter, X } from 'lucide-react';
+
+/* -----------------------------
+   Category keyword rules
+-------------------------------- */
+const CATEGORY_RULES = {
+  "Yoga Practice": ["yoga", "asana", "pose", "practice"],
+  Wellness: ["wellness", "health", "lifestyle"],
+  Meditation: ["meditation", "mindfulness", "pranayama"],
+  Nutrition: ["nutrition", "diet", "ayurveda"],
+};
 
 export default function News() {
   const [articles, setArticles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [lastFetched, setLastFetched] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const quickCategories = [
+    { label: 'Yoga Practice', value: 'Yoga Practice', color: 'bg-purple-100 text-purple-700 hover:bg-purple-200' },
+    { label: 'Wellness', value: 'Wellness', color: 'bg-blue-100 text-blue-700 hover:bg-blue-200' },
+    { label: 'Meditation', value: 'Meditation', color: 'bg-teal-100 text-teal-700 hover:bg-teal-200' },
+    { label: 'Nutrition', value: 'Nutrition', color: 'bg-green-100 text-green-700 hover:bg-green-200' }
+  ];
+
+  const fetchNews = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const timestamp = new Date().getTime();
+      const res = await api.get(`/news/yoga?_t=${timestamp}`);
+      setArticles(res.data || []);
+      setLastFetched(new Date());
+    } catch (err) {
+      console.error("News fetch error:", err);
+      setError("Failed to load news");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    async function fetchNews() {
-      try {
-        const res = await api.get("/news/yoga");
-        setArticles(res.data || []);
-      } catch (err) {
-        console.error("News fetch error:", err);
-        setError("Failed to load news");
-      } finally {
-        setLoading(false);
-      }
-    }
-
     fetchNews();
   }, []);
 
+  /* -----------------------------
+     Real-time derived data
+  -------------------------------- */
+
+  const categoryCounts = useMemo(() => {
+    const counts = {
+      "Yoga Practice": 0,
+      Wellness: 0,
+      Meditation: 0,
+      Nutrition: 0,
+    };
+
+    articles.forEach((a) => {
+      const text = `${a.title || ""} ${a.description || ""}`.toLowerCase();
+      for (const [category, keywords] of Object.entries(CATEGORY_RULES)) {
+        if (keywords.some((k) => text.includes(k))) {
+          counts[category]++;
+          break;
+        }
+      }
+    });
+
+    return counts;
+  }, [articles]);
+
+  const trendingTopics = useMemo(() => {
+    const freq = {};
+    articles.forEach((a) => {
+      (a.title || "")
+        .toLowerCase()
+        .split(" ")
+        .filter((w) => w.length > 5)
+        .forEach((w) => {
+          freq[w] = (freq[w] || 0) + 1;
+        });
+    });
+
+    return Object.entries(freq)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([word]) => word);
+  }, [articles]);
+
+  const popularSources = useMemo(() => {
+    const map = {};
+    articles.forEach((a) => {
+      const src = a.source?.name;
+      if (!src) return;
+      map[src] = (map[src] || 0) + 1;
+    });
+
+    return Object.entries(map)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3);
+  }, [articles]);
+
+  // Filter articles
+  const filteredArticles = useMemo(() => {
+    let filtered = articles;
+
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(a => 
+        (a.title || "").toLowerCase().includes(query) ||
+        (a.description || "").toLowerCase().includes(query)
+      );
+    }
+
+    if (selectedCategory) {
+      const keywords = CATEGORY_RULES[selectedCategory];
+      if (keywords) {
+        filtered = filtered.filter(a => {
+          const text = `${a.title || ""} ${a.description || ""}`.toLowerCase();
+          return keywords.some(k => text.includes(k));
+        });
+      }
+    }
+
+    return filtered;
+  }, [articles, searchQuery, selectedCategory]);
+
+  const handleCategoryClick = (category) => {
+    setSelectedCategory(category === selectedCategory ? "" : category);
+  };
+
+  const clearFilters = () => {
+    setSearchQuery("");
+    setSelectedCategory("");
+  };
+
+  const handleKeyPress = (e) => {
+    if (e.key === 'Enter') {
+      // Filtering happens automatically via useMemo
+    }
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 py-8 px-6">
-        <div className="max-w-7xl mx-auto flex gap-8">
-          <div className="flex-1">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">
-              Yoga & Health News
-            </h2>
-            <div className="flex items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600"></div>
-              <span className="ml-3 text-gray-600">Loading news...</span>
-            </div>
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 py-12 px-6">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-8">
+            Latest News
+          </h2>
+          <div className="flex items-center justify-center py-16">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-200 border-t-purple-600"></div>
+            <span className="ml-4 text-gray-600 text-lg font-medium">Loading news...</span>
           </div>
         </div>
       </div>
@@ -42,15 +161,13 @@ export default function News() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 py-8 px-6">
-        <div className="max-w-7xl mx-auto flex gap-8">
-          <div className="flex-1">
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">
-              Yoga & Health News
-            </h2>
-            <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded">
-              <p className="text-red-700">{error}</p>
-            </div>
+      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 py-12 px-6">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-8">
+            Latest News
+          </h2>
+          <div className="bg-red-50 border-l-4 border-red-500 p-6 rounded-xl shadow-md">
+            <p className="text-red-700 font-medium">{error}</p>
           </div>
         </div>
       </div>
@@ -58,186 +175,232 @@ export default function News() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 py-8 px-6">
-      <div className="max-w-7xl mx-auto flex gap-8">
-        {/* Left Sidebar */}
-        <aside className="hidden lg:block w-64 flex-shrink-0">
-          <div className="sticky top-8 space-y-6">
-            {/* Categories */}
-            <div className="bg-white rounded-lg shadow-sm p-5 border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Categories</h3>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between p-2 rounded hover:bg-purple-50 cursor-pointer transition-colors">
-                  <span className="text-gray-700">Yoga Practice</span>
-                  <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">
-                    {articles.length}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between p-2 rounded hover:bg-purple-50 cursor-pointer transition-colors">
-                  <span className="text-gray-700">Wellness</span>
-                  <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">12</span>
-                </div>
-                <div className="flex items-center justify-between p-2 rounded hover:bg-purple-50 cursor-pointer transition-colors">
-                  <span className="text-gray-700">Meditation</span>
-                  <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">8</span>
-                </div>
-                <div className="flex items-center justify-between p-2 rounded hover:bg-purple-50 cursor-pointer transition-colors">
-                  <span className="text-gray-700">Nutrition</span>
-                  <span className="text-xs bg-purple-100 text-purple-700 px-2 py-1 rounded-full">5</span>
-                </div>
-              </div>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 py-12 px-6">
+      <div className="max-w-7xl mx-auto">
+        
+        {/* Search & Filter Section */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 mb-8">
+          <div className="flex flex-col md:flex-row gap-4 mb-6">
+            <div className="flex-1 relative">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyPress={handleKeyPress}
+                placeholder="Search news articles..."
+                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition-colors"
+              />
             </div>
 
-            {/* Quick Stats */}
-            <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg shadow-sm p-5 text-white">
-              <h3 className="text-lg font-semibold mb-4">Today's Updates</h3>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-purple-100">Total Articles</span>
-                  <span className="text-2xl font-bold">{articles.length}</span>
-                </div>
-                <div className="border-t border-purple-400 pt-3">
-                  <p className="text-sm text-purple-100">
-                    Stay informed with the latest yoga and wellness news
-                  </p>
-                </div>
-              </div>
+            <div className="flex gap-2">
+              <button
+                onClick={fetchNews}
+                disabled={loading}
+                className="px-6 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
+                Refresh
+              </button>
+
+              {(searchQuery || selectedCategory) && (
+                <button
+                  onClick={clearFilters}
+                  className="px-4 py-3 bg-gray-200 text-gray-700 rounded-xl font-semibold hover:bg-gray-300 transition-all flex items-center gap-2"
+                >
+                  <X className="w-5 h-5" />
+                  Clear
+                </button>
+              )}
             </div>
           </div>
-        </aside>
 
-        {/* Main Content */}
-        <main className="flex-1 min-w-0">
-          <h2 className="text-3xl font-bold text-gray-800 mb-8">
-            Yoga & Health News
-          </h2>
+          {/* Quick Filters */}
+          <div className="flex items-center gap-2 flex-wrap">
+            <Filter className="w-5 h-5 text-gray-500" />
+            <span className="text-sm font-semibold text-gray-600">Quick Filters:</span>
 
-          {articles.length === 0 && (
-            <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-              <p className="text-gray-500">
-                No yoga or health news available at the moment.
-              </p>
-            </div>
-          )}
-
-          {/* News List */}
-          <div className="space-y-4">
-            {articles.map((item, index) => (
-              <a
-                key={index}
-                href={item.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all duration-200 p-5 border border-gray-100 flex gap-4 block group"
+            {quickCategories.map(cat => (
+              <button
+                key={cat.value}
+                onClick={() => handleCategoryClick(cat.value)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  selectedCategory === cat.value ? 'ring-2 ring-offset-2 ring-purple-500 ' + cat.color : cat.color
+                }`}
               >
-                {/* Image */}
-                {item.urlToImage && (
-                  <div className="flex-shrink-0 w-32 h-32 rounded-lg overflow-hidden bg-gray-200">
-                    <img
-                      src={item.urlToImage}
-                      alt={item.title || "News image"}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                      onError={(e) => {
-                        e.target.style.display = "none";
-                      }}
-                    />
-                  </div>
-                )}
-
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <h4 className="text-xl font-semibold text-gray-800 mb-2 group-hover:text-purple-600 transition-colors">
-                    {item.title || "Untitled"}
-                  </h4>
-
-                  {item.description && (
-                    <p className="text-gray-600 leading-relaxed mb-3 line-clamp-2">
-                      {item.description}
-                    </p>
-                  )}
-
-                  <div className="flex items-center text-sm text-gray-500">
-                    <span className="font-medium text-purple-600">
-                      {item.source?.name || "Unknown source"}
-                    </span>
-                    <span className="mx-2">•</span>
-                    <span>
-                      {item.publishedAt
-                        ? new Date(item.publishedAt).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                          })
-                        : ""}
-                    </span>
-                  </div>
-                </div>
-              </a>
+                {cat.label}
+              </button>
             ))}
           </div>
-        </main>
+        </div>
 
-        {/* Right Sidebar */}
-        <aside className="hidden xl:block w-80 flex-shrink-0">
-          <div className="sticky top-8 space-y-6">
-            {/* Trending Topics */}
-            <div className="bg-white rounded-lg shadow-sm p-5 border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Trending Topics</h3>
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">🧘</span>
-                  <span className="text-gray-700">Morning Yoga Routines</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">🌿</span>
-                  <span className="text-gray-700">Mindful Meditation</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">💪</span>
-                  <span className="text-gray-700">Strength & Flexibility</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">🍃</span>
-                  <span className="text-gray-700">Ayurvedic Wellness</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">😌</span>
-                  <span className="text-gray-700">Stress Relief</span>
+        <div className="flex gap-6">
+          {/* Left Sidebar */}
+          <aside className="hidden lg:block w-72 flex-shrink-0">
+            <div className="sticky top-8 space-y-6">
+              <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow duration-300">
+                <h3 className="text-xl font-bold text-gray-900 mb-5 flex items-center gap-2">
+                  Categories
+                </h3>
+
+                <div className="space-y-3">
+                  {Object.entries(categoryCounts).map(([cat, count]) => (
+                    <div
+                      key={cat}
+                      onClick={() => handleCategoryClick(cat)}
+                      className="flex items-center justify-between p-3 rounded-lg hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 cursor-pointer transition-all duration-200 group"
+                    >
+                      <span className="text-gray-700 font-medium group-hover:text-purple-700 transition-colors">
+                        {cat}
+                      </span>
+                      <span className="text-xs bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full font-semibold group-hover:bg-purple-600 group-hover:text-white transition-all">
+                        {count}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
+          </aside>
 
-            {/* Popular Sources */}
-            <div className="bg-white rounded-lg shadow-sm p-5 border border-gray-100">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Popular Sources</h3>
-              <div className="space-y-2">
-                <div className="p-2 rounded hover:bg-gray-50 cursor-pointer transition-colors">
-                  <p className="font-medium text-gray-800">Yoga Journal</p>
-                  <p className="text-xs text-gray-500">Daily yoga insights</p>
-                </div>
-                <div className="p-2 rounded hover:bg-gray-50 cursor-pointer transition-colors">
-                  <p className="font-medium text-gray-800">Health Today</p>
-                  <p className="text-xs text-gray-500">Wellness updates</p>
-                </div>
-                <div className="p-2 rounded hover:bg-gray-50 cursor-pointer transition-colors">
-                  <p className="font-medium text-gray-800">Wellness Weekly</p>
-                  <p className="text-xs text-gray-500">Lifestyle & health</p>
-                </div>
+          {/* Main Content */}
+          <main className="flex-1 min-w-0">
+            <div className="flex items-center justify-between mb-10">
+              <h2 className="text-4xl font-bold text-gray-900 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                 Latest News
+              </h2>
+              <div className="flex items-center gap-3">
+                {lastFetched && (
+                  <span className="text-sm text-gray-500">
+                    Updated: {lastFetched.toLocaleTimeString()}
+                  </span>
+                )}
               </div>
             </div>
 
-            {/* Newsletter Box */}
-            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-sm p-5 text-white">
-              <h3 className="text-lg font-semibold mb-2">Stay Updated</h3>
-              <p className="text-sm text-blue-100 mb-4">
-                Get the latest yoga and wellness news delivered to your inbox
+            {!loading && filteredArticles.length > 0 && (
+              <p className="text-gray-600 mb-6">
+                Found <span className="font-semibold text-purple-600">{filteredArticles.length}</span> articles
+                {selectedCategory && ` in "${selectedCategory}"`}
               </p>
-              <button className="w-full bg-white text-blue-600 font-medium py-2 px-4 rounded-lg hover:bg-blue-50 transition-colors">
-                Subscribe
-              </button>
+            )}
+
+            <div className="space-y-5">
+              {filteredArticles.map((item, index) => (
+                <a
+                  key={index}
+                  href={item.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border border-gray-200 flex gap-5 block group hover:border-purple-300 hover:-translate-y-1"
+                >
+                  {item.urlToImage && (
+                    <div className="flex-shrink-0 w-36 h-36 rounded-xl overflow-hidden bg-gray-200 ring-2 ring-gray-100 group-hover:ring-purple-300 transition-all">
+                      <img
+                        src={item.urlToImage}
+                        alt={item.title || "News image"}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        onError={(e) => (e.target.style.display = "none")}
+                      />
+                    </div>
+                  )}
+
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors leading-snug">
+                      {item.title || "Untitled"}
+                    </h4>
+
+                    {item.description && (
+                      <p className="text-gray-600 leading-relaxed mb-4 line-clamp-2">
+                        {item.description}
+                      </p>
+                    )}
+
+                    <div className="flex items-center text-sm text-gray-500">
+                      <span className="font-semibold text-purple-600 group-hover:text-purple-700 transition-colors">
+                        {item.source?.name || "Unknown source"}
+                      </span>
+                      <span className="mx-2.5 text-gray-400">•</span>
+                      <span>
+                        {item.publishedAt
+                          ? new Date(item.publishedAt).toLocaleDateString(
+                              "en-US",
+                              {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              }
+                            )
+                          : ""}
+                      </span>
+                    </div>
+                  </div>
+                </a>
+              ))}
             </div>
-          </div>
-        </aside>
+
+            {!loading && filteredArticles.length === 0 && (
+              <div className="text-center py-20">
+                <h3 className="text-2xl font-semibold text-gray-700 mb-2">No articles found</h3>
+                <p className="text-gray-500 mb-6">Try different search terms or clear filters</p>
+                <button
+                  onClick={clearFilters}
+                  className="px-6 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700"
+                >
+                  Show All Articles
+                </button>
+              </div>
+            )}
+          </main>
+
+          {/* Right Sidebar */}
+          <aside className="hidden xl:block w-80 flex-shrink-0">
+            <div className="sticky top-8 space-y-6">
+              <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow duration-300">
+                <h3 className="text-xl font-bold text-gray-900 mb-5 flex items-center gap-2">
+                  Trending Topics
+                </h3>
+
+                <div className="space-y-3">
+                  {trendingTopics.map((topic, i) => (
+                    <div
+                      key={i}
+                      className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gradient-to-r hover:from-orange-50 hover:to-red-50 transition-all cursor-pointer group"
+                    >
+                      <span className="text-sm font-semibold text-purple-600 group-hover:text-orange-600 transition-colors">
+                        #{i + 1}
+                      </span>
+                      <span className="text-gray-700 capitalize font-medium group-hover:text-gray-900 transition-colors">
+                        {topic}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-md p-6 border border-gray-200 hover:shadow-lg transition-shadow duration-300">
+                <h3 className="text-xl font-bold text-gray-900 mb-5 flex items-center gap-2">
+                  Popular Sources
+                </h3>
+
+                <div className="space-y-3">
+                  {popularSources.map(([src, count]) => (
+                    <div
+                      key={src}
+                      className="p-3 rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all cursor-pointer group"
+                    >
+                      <p className="font-semibold text-gray-900 group-hover:text-purple-700 transition-colors">
+                        {src}
+                      </p>
+                      <p className="text-xs text-gray-500 mt-1 font-medium">
+                        {count} {count === 1 ? "article" : "articles"}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
       </div>
     </div>
   );
