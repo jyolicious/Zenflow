@@ -1,33 +1,73 @@
-// routes/newsletters.js
 import express from "express";
 import Newsletter from "../models/Newsletter.js";
 
 const router = express.Router();
 
-// GET /api/newsletters
-// (If not public, restrict via auth on frontend or add middleware later)
+/**
+ * GET /newsletters
+ * List all newsletters (metadata only)
+ */
 router.get("/", async (req, res) => {
   try {
-    const items = await Newsletter.find({})
-      .sort({ created_at: -1 })
-      .lean();
+    const newsletters = await Newsletter.find()
+      .sort({ publishedAt: -1 })
+      .select("title theme description publishedAt");
 
-    res.json(items);
+    res.json(newsletters);
   } catch (err) {
-    console.error("GET /api/newsletters error", err);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ message: "Failed to fetch newsletters" });
   }
 });
 
-// POST /api/newsletters (admin)
-router.post("/", async (req, res) => {
+/**
+ * GET /newsletters/:id
+ * Single newsletter with access control
+ */
+router.get("/:id", async (req, res) => {
   try {
-    // TODO: restrict to admin using requireAdmin middleware
-    const created = await Newsletter.create(req.body);
-    res.status(201).json(created);
+    const newsletter = await Newsletter.findById(req.params.id);
+
+    if (!newsletter) {
+      return res.status(404).json({ message: "Newsletter not found" });
+    }
+
+    const isLoggedIn = Boolean(req.user); // later from auth middleware
+
+    // 🔐 Login required
+    if (!isLoggedIn) {
+      return res.json({
+        locked: true,
+        reason: "LOGIN_REQUIRED",
+        preview: {
+          title: newsletter.title,
+          theme: newsletter.theme,
+          description: newsletter.description,
+          publishedAt: newsletter.publishedAt,
+        },
+      });
+    }
+
+    // 🔒 Premium early access (15 days)
+    if (newsletter.isPremium) {
+      return res.json({
+        locked: true,
+        reason: "PREMIUM_EARLY_ACCESS",
+        preview: {
+          title: newsletter.title,
+          theme: newsletter.theme,
+          description: newsletter.description,
+          publishedAt: newsletter.publishedAt,
+        },
+      });
+    }
+
+    // ✅ Free access
+    return res.json({
+      locked: false,
+      newsletter,
+    });
   } catch (err) {
-    console.error("POST /api/newsletters error", err);
-    res.status(400).json({ error: "Bad request" });
+    res.status(500).json({ message: "Failed to fetch newsletter" });
   }
 });
 
