@@ -1,16 +1,5 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import api from "../api/axios";
-
-const INSTRUCTORS = [
-  "Ananya Deshmukh",
-  "Rohit Kulkarni",
-  "Sneha Patil",
-  "Amit Joshi",
-  "Neha Shah",
-  "Kunal Mehta",
-  "Pooja Nair",
-  "Siddharth Rao",
-];
 
 export default function Contact() {
   const [form, setForm] = useState({
@@ -23,9 +12,30 @@ export default function Contact() {
     message: "",
   });
 
+  const [instructors, setInstructors] = useState([]);
   const [msg, setMsg] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  /* -------------------------------
+     FETCH INSTRUCTORS (DYNAMIC)
+  -------------------------------- */
+  useEffect(() => {
+    async function fetchInstructors() {
+      try {
+        const res = await api.get("/instructors");
+        // Expecting array of instructor objects with `name`
+        setInstructors(res.data || []);
+      } catch (err) {
+        console.error("Failed to fetch instructors", err);
+      }
+    }
+
+    fetchInstructors();
+  }, []);
+
+  /* -------------------------------
+     SUBMIT FORM
+  -------------------------------- */
   async function submit(e) {
     e.preventDefault();
     setMsg(null);
@@ -103,21 +113,21 @@ export default function Contact() {
             className="w-full border px-3 py-2 rounded-lg"
           />
 
-          {/* Instructor */}
+          {/* Instructor (DYNAMIC) */}
           <select
             value={form.instructor}
             onChange={(e) => setForm({ ...form, instructor: e.target.value })}
             className="w-full border px-3 py-2 rounded-lg"
           >
             <option value="">Select Instructor (Optional)</option>
-            {INSTRUCTORS.map((ins) => (
-              <option key={ins} value={ins}>
-                {ins}
+            {instructors.map((ins) => (
+              <option key={ins._id || ins.name} value={ins.name}>
+                {ins.name}
               </option>
             ))}
           </select>
 
-          {/* Program */}
+          {/* Program (STATIC) */}
           <select
             value={form.program}
             onChange={(e) => setForm({ ...form, program: e.target.value })}
@@ -128,7 +138,7 @@ export default function Contact() {
             <option>Meditation Session</option>
           </select>
 
-          {/* Timeslot */}
+          {/* Timeslot (STATIC) */}
           <select
             value={form.timeslot}
             onChange={(e) => setForm({ ...form, timeslot: e.target.value })}

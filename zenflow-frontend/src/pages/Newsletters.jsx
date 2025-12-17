@@ -1,6 +1,17 @@
 import React, { useEffect, useState } from "react";
 import api from "../api/axios";
-import { LogIn, Crown, BookOpen, Calendar, Lock, Unlock, Sparkles, FileText, ArrowRight } from "lucide-react";
+import {
+  LogIn,
+  Crown,
+  BookOpen,
+  Calendar,
+  Lock,
+  Unlock,
+  FileText,
+  ArrowRight,
+  Sparkles,
+  Loader2,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export default function Newsletter() {
@@ -12,14 +23,28 @@ export default function Newsletter() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
 
+  /* -------------------------------
+     USER-SCOPED SUB KEY
+  -------------------------------- */
+  const token = localStorage.getItem("token");
+  const SUB_KEY = token ? `isSubscribed_${token}` : null;
+
+  /* -------------------------------
+     INIT
+  -------------------------------- */
   useEffect(() => {
-    setIsLoggedIn(!!localStorage.getItem("token"));
-    setIsSubscribed(localStorage.getItem("isSubscribed") === "true");
+    const loggedIn = !!token;
+    setIsLoggedIn(loggedIn);
+
+    if (loggedIn && SUB_KEY) {
+      setIsSubscribed(localStorage.getItem(SUB_KEY) === "true");
+    } else {
+      setIsSubscribed(false);
+    }
 
     async function fetchNewsletters() {
       try {
         const res = await api.get("/newsletters");
-        console.log("NEWSLETTER RESPONSE:", res.data);
         setNewsletters(res.data || []);
       } catch {
         setError("Failed to load newsletters");
@@ -29,8 +54,11 @@ export default function Newsletter() {
     }
 
     fetchNewsletters();
-  }, []);
+  }, [token, SUB_KEY]);
 
+  /* -------------------------------
+     PREMIUM: 15 DAYS
+  -------------------------------- */
   const isPremium = (publishedAt) => {
     const days =
       (Date.now() - new Date(publishedAt).getTime()) /
@@ -38,21 +66,20 @@ export default function Newsletter() {
     return days < 15;
   };
 
-  const resolvePdfUrl = (item) => {
-    return (
-      item.pdf_url ||
-      item.pdfUrl ||
-      item.pdf ||
-      item.file_url ||
-      null
-    );
-  };
+  /* -------------------------------
+     PDF RESOLVER
+  -------------------------------- */
+  const resolvePdfUrl = (item) =>
+    item.pdf_url || item.pdfUrl || item.pdf || item.file_url || null;
 
+  /* -------------------------------
+     STATES
+  -------------------------------- */
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-teal-50 via-blue-50 to-purple-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin h-12 w-12 border-4 border-teal-600 border-t-transparent rounded-full mx-auto mb-4" />
+          <Loader2 className="w-12 h-12 text-teal-600 animate-spin mx-auto mb-4" />
           <p className="text-gray-600">Loading newsletters...</p>
         </div>
       </div>
@@ -69,6 +96,9 @@ export default function Newsletter() {
     );
   }
 
+  /* -------------------------------
+     RENDER
+  -------------------------------- */
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-blue-50 to-purple-50 py-12 px-4">
       <div className="max-w-7xl mx-auto">
@@ -85,11 +115,11 @@ export default function Newsletter() {
           </h1>
           
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Curated wellness insights, yoga practices, meditation techniques, and holistic health tips delivered to your reading list
+            Curated wellness insights, yoga practices, meditation techniques, and holistic health tips
           </p>
         </div>
 
-        {/* Login/Subscribe Banner */}
+        {/* Login Banner */}
         {!isLoggedIn && (
           <div className="bg-gradient-to-r from-teal-500 to-blue-500 rounded-2xl p-6 mb-10 shadow-lg">
             <div className="flex flex-col md:flex-row items-center gap-4 text-white">
@@ -110,7 +140,7 @@ export default function Newsletter() {
           </div>
         )}
 
-        {/* Subscription Info Banner for Logged In Users */}
+        {/* Subscription Banner */}
         {isLoggedIn && !isSubscribed && (
           <div className="bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl p-6 mb-10 shadow-lg">
             <div className="flex flex-col md:flex-row items-center gap-4 text-white">
@@ -121,6 +151,16 @@ export default function Newsletter() {
                 <h3 className="text-xl font-bold mb-1">Unlock Premium Content</h3>
                 <p className="text-purple-50">Subscribe to access the latest newsletters within 15 days of publication</p>
               </div>
+              <button
+                onClick={() => {
+                  localStorage.setItem(SUB_KEY, "true");
+                  setIsSubscribed(true);
+                  alert("🎉 Subscription activated! You now have access to all premium content.");
+                }}
+                className="bg-white text-purple-600 px-6 py-3 rounded-xl font-semibold hover:bg-purple-50 transition-all shadow-md"
+              >
+                Subscribe Free
+              </button>
             </div>
           </div>
         )}
@@ -211,9 +251,7 @@ export default function Newsletter() {
                       }
 
                       if (needsSubscription) {
-                        localStorage.setItem("isSubscribed", "true");
-                        setIsSubscribed(true);
-                        alert("🎉 Subscription activated! You now have access to all premium content.");
+                        alert("Please subscribe to access this premium newsletter.");
                         return;
                       }
 
