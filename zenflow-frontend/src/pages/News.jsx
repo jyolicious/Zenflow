@@ -21,10 +21,10 @@ export default function News() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const quickCategories = [
-    { label: 'Yoga Practice', value: 'Yoga Practice', color: 'bg-purple-100 text-purple-700 hover:bg-purple-200' },
+    { label: 'Yoga Practice', value: 'Yoga Practice', color: 'bg-teal-100 text-teal-700 hover:bg-teal-200' },
     { label: 'Wellness', value: 'Wellness', color: 'bg-blue-100 text-blue-700 hover:bg-blue-200' },
-    { label: 'Meditation', value: 'Meditation', color: 'bg-teal-100 text-teal-700 hover:bg-teal-200' },
-    { label: 'Nutrition', value: 'Nutrition', color: 'bg-green-100 text-green-700 hover:bg-green-200' }
+    { label: 'Meditation', value: 'Meditation', color: 'bg-purple-100 text-purple-700 hover:bg-purple-200' },
+    { label: 'Nutrition', value: 'Nutrition', color: 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200' }
   ];
 
   const fetchNews = async () => {
@@ -145,13 +145,13 @@ export default function News() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 py-12 px-6">
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-blue-50 to-purple-50 py-12 px-6">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-8">
+          <h2 className="text-4xl font-bold bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent mb-8">
             Latest News
           </h2>
           <div className="flex items-center justify-center py-16">
-            <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-200 border-t-purple-600"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-teal-200 border-t-teal-600"></div>
             <span className="ml-4 text-gray-600 text-lg font-medium">Loading news...</span>
           </div>
         </div>
@@ -161,9 +161,9 @@ export default function News() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 py-12 px-6">
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 via-blue-50 to-purple-50 py-12 px-6">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent mb-8">
+          <h2 className="text-4xl font-bold bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent mb-8">
             Latest News
           </h2>
           <div className="bg-red-50 border-l-4 border-red-500 p-6 rounded-xl shadow-md">
@@ -175,7 +175,7 @@ export default function News() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 py-12 px-6">
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-blue-50 to-purple-50 py-12 px-6">
       <div className="max-w-7xl mx-auto">
         
         {/* Search & Filter Section */}
@@ -188,7 +188,7 @@ export default function News() {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Search news articles..."
-                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:outline-none transition-colors"
+                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:border-teal-500 focus:outline-none transition-colors"
               />
             </div>
 
@@ -196,7 +196,7 @@ export default function News() {
               <button
                 onClick={fetchNews}
                 disabled={loading}
-                className="px-6 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                className="px-6 py-3 bg-teal-600 text-white rounded-xl font-semibold hover:bg-teal-700 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
               >
                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : null}
                 Refresh
@@ -224,7 +224,7 @@ export default function News() {
                 key={cat.value}
                 onClick={() => handleCategoryClick(cat.value)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  selectedCategory === cat.value ? 'ring-2 ring-offset-2 ring-purple-500 ' + cat.color : cat.color
+                  selectedCategory === cat.value ? 'ring-2 ring-offset-2 ring-teal-500 ' + cat.color : cat.color
                 }`}
               >
                 {cat.label}
@@ -247,12 +247,12 @@ export default function News() {
                     <div
                       key={cat}
                       onClick={() => handleCategoryClick(cat)}
-                      className="flex items-center justify-between p-3 rounded-lg hover:bg-gradient-to-r hover:from-purple-50 hover:to-blue-50 cursor-pointer transition-all duration-200 group"
+                      className="flex items-center justify-between p-3 rounded-lg hover:bg-gradient-to-r hover:from-teal-50 hover:to-blue-50 cursor-pointer transition-all duration-200 group"
                     >
-                      <span className="text-gray-700 font-medium group-hover:text-purple-700 transition-colors">
+                      <span className="text-gray-700 font-medium group-hover:text-teal-700 transition-colors">
                         {cat}
                       </span>
-                      <span className="text-xs bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full font-semibold group-hover:bg-purple-600 group-hover:text-white transition-all">
+                      <span className="text-xs bg-teal-100 text-teal-700 px-3 py-1.5 rounded-full font-semibold group-hover:bg-teal-600 group-hover:text-white transition-all">
                         {count}
                       </span>
                     </div>
@@ -265,7 +265,7 @@ export default function News() {
           {/* Main Content */}
           <main className="flex-1 min-w-0">
             <div className="flex items-center justify-between mb-10">
-              <h2 className="text-4xl font-bold text-gray-900 bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              <h2 className="text-4xl font-bold text-gray-900 bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent">
                  Latest News
               </h2>
               <div className="flex items-center gap-3">
@@ -279,7 +279,7 @@ export default function News() {
 
             {!loading && filteredArticles.length > 0 && (
               <p className="text-gray-600 mb-6">
-                Found <span className="font-semibold text-purple-600">{filteredArticles.length}</span> articles
+                Found <span className="font-semibold text-teal-600">{filteredArticles.length}</span> articles
                 {selectedCategory && ` in "${selectedCategory}"`}
               </p>
             )}
@@ -291,10 +291,10 @@ export default function News() {
                   href={item.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border border-gray-200 flex gap-5 block group hover:border-purple-300 hover:-translate-y-1"
+                  className="bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 p-6 border border-gray-200 flex gap-5 block group hover:border-teal-300 hover:-translate-y-1"
                 >
                   {item.urlToImage && (
-                    <div className="flex-shrink-0 w-36 h-36 rounded-xl overflow-hidden bg-gray-200 ring-2 ring-gray-100 group-hover:ring-purple-300 transition-all">
+                    <div className="flex-shrink-0 w-36 h-36 rounded-xl overflow-hidden bg-gray-200 ring-2 ring-gray-100 group-hover:ring-teal-300 transition-all">
                       <img
                         src={item.urlToImage}
                         alt={item.title || "News image"}
@@ -305,7 +305,7 @@ export default function News() {
                   )}
 
                   <div className="flex-1 min-w-0">
-                    <h4 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-purple-600 transition-colors leading-snug">
+                    <h4 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-teal-600 transition-colors leading-snug">
                       {item.title || "Untitled"}
                     </h4>
 
@@ -316,7 +316,7 @@ export default function News() {
                     )}
 
                     <div className="flex items-center text-sm text-gray-500">
-                      <span className="font-semibold text-purple-600 group-hover:text-purple-700 transition-colors">
+                      <span className="font-semibold text-teal-600 group-hover:text-teal-700 transition-colors">
                         {item.source?.name || "Unknown source"}
                       </span>
                       <span className="mx-2.5 text-gray-400">•</span>
@@ -344,7 +344,7 @@ export default function News() {
                 <p className="text-gray-500 mb-6">Try different search terms or clear filters</p>
                 <button
                   onClick={clearFilters}
-                  className="px-6 py-3 bg-purple-600 text-white rounded-xl font-semibold hover:bg-purple-700"
+                  className="px-6 py-3 bg-teal-600 text-white rounded-xl font-semibold hover:bg-teal-700"
                 >
                   Show All Articles
                 </button>
@@ -364,9 +364,9 @@ export default function News() {
                   {trendingTopics.map((topic, i) => (
                     <div
                       key={i}
-                      className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gradient-to-r hover:from-orange-50 hover:to-red-50 transition-all cursor-pointer group"
+                      className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all cursor-pointer group"
                     >
-                      <span className="text-sm font-semibold text-purple-600 group-hover:text-orange-600 transition-colors">
+                      <span className="text-sm font-semibold text-teal-600 group-hover:text-blue-600 transition-colors">
                         #{i + 1}
                       </span>
                       <span className="text-gray-700 capitalize font-medium group-hover:text-gray-900 transition-colors">
@@ -386,9 +386,9 @@ export default function News() {
                   {popularSources.map(([src, count]) => (
                     <div
                       key={src}
-                      className="p-3 rounded-lg hover:bg-gradient-to-r hover:from-blue-50 hover:to-purple-50 transition-all cursor-pointer group"
+                      className="p-3 rounded-lg hover:bg-gradient-to-r hover:from-teal-50 hover:to-blue-50 transition-all cursor-pointer group"
                     >
-                      <p className="font-semibold text-gray-900 group-hover:text-purple-700 transition-colors">
+                      <p className="font-semibold text-gray-900 group-hover:text-teal-700 transition-colors">
                         {src}
                       </p>
                       <p className="text-xs text-gray-500 mt-1 font-medium">
