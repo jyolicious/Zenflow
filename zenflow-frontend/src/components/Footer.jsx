@@ -126,9 +126,13 @@ export default function Footer(){
                 </a>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-white transition-colors flex items-center gap-2">
-                  FAQ
-                </a>
+              <Link
+               to="/#faq"
+               className="text-gray-300 hover:text-white transition-colors flex items-center gap-2"
+              >
+              FAQ
+              </Link>
+
               </li>
             </ul>
           </div>

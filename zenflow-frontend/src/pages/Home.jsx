@@ -1,7 +1,40 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 
-export default function Home(){
+export default function Home() {
+  const [openFaq, setOpenFaq] = useState(null);
+
+  const faqs = [
+    {
+      question: "What should I bring to my first yoga class?",
+      answer: "For your first class, bring a yoga mat (or we can provide one), comfortable clothing that allows movement, a water bottle, and an open mind. We recommend arriving 10-15 minutes early to get settled and meet your instructor."
+    },
+    {
+      question: "Do I need to be flexible to start yoga?",
+      answer: "Absolutely not! Flexibility is a result of yoga practice, not a prerequisite. Our classes are designed for all levels, and our instructors will guide you through modifications suitable for your current abilities. Everyone starts somewhere, and we celebrate progress at every stage."
+    },
+    {
+      question: "What's the difference between yoga and meditation classes?",
+      answer: "Yoga classes focus on physical postures (asanas) combined with breathwork, building strength, flexibility, and balance. Meditation classes emphasize mental stillness and awareness through guided practices. Many students find that combining both creates a complete mind-body wellness routine."
+    },
+    {
+      question: "How often should I practice yoga?",
+      answer: "For beginners, we recommend starting with 2-3 classes per week to allow your body to adapt. As you build strength and familiarity, you can increase frequency. Even practicing once a week consistently will bring noticeable benefits to your physical and mental well-being."
+    },
+    {
+      question: "Can I join if I have an injury or health condition?",
+      answer: "Yes! Please inform your instructor about any injuries or health conditions before class. Our experienced teachers can provide modifications and alternative poses to ensure your practice is safe and beneficial. We recommend consulting your healthcare provider before starting any new fitness program."
+    }
+  ];
+
+  const toggleFaq = (index) => {
+    setOpenFaq(openFaq === index ? null : index);
+  };
+
+  const navigate = (path) => {
+    alert(`Navigation to: ${path}`);
+  };
+
   return (
     <div className="min-h-screen">
       {/* Hero Section - Full Screen Impact */}
@@ -25,18 +58,18 @@ export default function Home(){
             Begin where you are. Breathe. Move. Transform.
           </p>
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
-            <Link 
-              to="/asanas" 
+            <button 
+              onClick={() => navigate('/asanas')}
               className="px-12 py-5 bg-teal-500 text-white text-xl font-semibold rounded-full hover:bg-teal-400 transform hover:scale-105 transition-all duration-300 shadow-2xl"
             >
               Start Your Practice
-            </Link>
-            <Link 
-              to="/contact" 
+            </button>
+            <button 
+              onClick={() => navigate('/contact')}
               className="px-12 py-5 bg-white/20 backdrop-blur-sm text-white text-xl font-semibold rounded-full border-2 border-white hover:bg-white/30 transform hover:scale-105 transition-all duration-300"
             >
               Book Free Trial
-            </Link>
+            </button>
           </div>
         </div>
 
@@ -57,7 +90,7 @@ export default function Home(){
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {/* Asanas */}
-            <Link to="/asanas" className="group relative h-80 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
+            <button onClick={() => navigate('/asanas')} className="group relative h-80 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 w-full text-left">
               <img 
                 src="https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&q=80" 
                 alt="Asanas" 
@@ -71,10 +104,10 @@ export default function Home(){
                   Explore Poses →
                 </span>
               </div>
-            </Link>
+            </button>
 
             {/* Meditations */}
-            <Link to="/meditations" className="group relative h-80 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
+            <button onClick={() => navigate('/meditations')} className="group relative h-80 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 w-full text-left">
               <img 
                 src="https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=600&q=80" 
                 alt="Meditations" 
@@ -88,10 +121,10 @@ export default function Home(){
                   Find Peace →
                 </span>
               </div>
-            </Link>
+            </button>
 
             {/* Instructors */}
-            <Link to="/instructors" className="group relative h-80 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
+            <button onClick={() => navigate('/instructors')} className="group relative h-80 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 w-full text-left">
               <img 
                 src="https://images.unsplash.com/photo-1599901860904-17e6ed7083a0?w=600&q=80" 
                 alt="Instructors" 
@@ -105,10 +138,10 @@ export default function Home(){
                   Meet Our Team →
                 </span>
               </div>
-            </Link>
+            </button>
 
             {/* Book Trial */}
-            <Link to="/contact" className="group relative h-80 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
+            <button onClick={() => navigate('/contact')} className="group relative h-80 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 w-full text-left">
               <img 
                 src="https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80" 
                 alt="Book Trial" 
@@ -122,10 +155,10 @@ export default function Home(){
                   Reserve Spot →
                 </span>
               </div>
-            </Link>
+            </button>
 
             {/* News */}
-            <Link to="/news" className="group relative h-80 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
+            <button onClick={() => navigate('/news')} className="group relative h-80 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 w-full text-left">
               <img 
                 src="https://images.unsplash.com/photo-1545389336-cf090694435e?w=600&q=80" 
                 alt="News" 
@@ -139,10 +172,10 @@ export default function Home(){
                   Read More →
                 </span>
               </div>
-            </Link>
+            </button>
 
             {/* Newsletters */}
-            <Link to="/newsletters" className="group relative h-80 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300">
+            <button onClick={() => navigate('/newsletters')} className="group relative h-80 rounded-3xl overflow-hidden shadow-xl hover:shadow-2xl transform hover:scale-105 transition-all duration-300 w-full text-left">
               <img 
                 src="https://images.unsplash.com/photo-1512438248247-f0f2a5a8b7f0?w=600&q=80" 
                 alt="Newsletters" 
@@ -156,7 +189,7 @@ export default function Home(){
                   Subscribe →
                 </span>
               </div>
-            </Link>
+            </button>
           </div>
         </div>
       </section>
@@ -165,9 +198,56 @@ export default function Home(){
       <section className="py-32 px-6 bg-gradient-to-br from-teal-600 to-purple-600 text-white">
         <div className="max-w-4xl mx-auto text-center">
           <blockquote className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-            “When the mind becomes still, the soul begins to speak.”
+            "When the mind becomes still, the soul begins to speak."
           </blockquote>
           <p className="text-xl opacity-90 font-medium">— Bhagavad Gita</p>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section id="faq" className="py-24 px-6 bg-gradient-to-b from-teal-50 to-white">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-5xl font-bold text-center text-gray-800 mb-4">
+            Frequently Asked Questions
+          </h2>
+          <p className="text-xl text-gray-600 text-center mb-12">
+            Everything you need to know to start your yoga journey
+          </p>
+
+          <div className="space-y-4">
+            {faqs.map((faq, index) => (
+              <div 
+                key={index}
+                className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-100 transition-all duration-300 hover:shadow-xl"
+              >
+                <button
+                  onClick={() => toggleFaq(index)}
+                  className="w-full px-8 py-6 text-left flex items-center justify-between gap-4 hover:bg-teal-50 transition-colors duration-200"
+                >
+                  <span className="text-xl font-semibold text-gray-800 pr-4">
+                    {faq.question}
+                  </span>
+                  <ChevronDown 
+                    className={`w-6 h-6 text-teal-600 flex-shrink-0 transition-transform duration-300 ${
+                      openFaq === index ? 'rotate-180' : ''
+                    }`}
+                  />
+                </button>
+                
+                <div 
+                  className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                    openFaq === index ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+                  }`}
+                >
+                  <div className="px-8 pb-6 pt-2">
+                    <p className="text-gray-600 leading-relaxed text-lg">
+                      {faq.answer}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -180,14 +260,14 @@ export default function Home(){
           <p className="text-2xl text-gray-600 mb-12">
             Join thousands finding balance, strength, and peace through yoga.
           </p>
-          <Link 
-            to="/contact" 
+          <button 
+            onClick={() => navigate('/contact')}
             className="inline-block px-16 py-6 bg-gradient-to-r from-teal-500 to-teal-600 text-white text-2xl font-semibold rounded-full hover:from-teal-600 hover:to-teal-700 transform hover:scale-105 transition-all duration-300 shadow-2xl"
           >
             Book Your Free Trial Class
-          </Link>
+          </button>
         </div>
       </section>
     </div>
-  )
+  );
 }
