@@ -1,42 +1,163 @@
-// src/pages/Contact.jsx
-import React, { useState } from 'react'
-import api from '../api/axios'
+import React, { useState } from "react";
+import api from "../api/axios";
 
-export default function Contact(){
-  const [form, setForm] = useState({ name:'', email:'', program:'Trial Class', message:'', timeslot:'Morning' })
-  const [msg, setMsg] = useState(null)
-  const [loading, setLoading] = useState(false)
+const INSTRUCTORS = [
+  "Ananya Deshmukh",
+  "Rohit Kulkarni",
+  "Sneha Patil",
+  "Amit Joshi",
+  "Neha Shah",
+  "Kunal Mehta",
+  "Pooja Nair",
+  "Siddharth Rao",
+];
 
-  async function submit(e){
-    e.preventDefault()
-    setMsg(null); setLoading(true)
+export default function Contact() {
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    instructor: "",
+    program: "Trial Class",
+    timeslot: "Morning",
+    message: "",
+  });
+
+  const [msg, setMsg] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  async function submit(e) {
+    e.preventDefault();
+    setMsg(null);
+    setLoading(true);
+
     try {
-      await api.post('/bookings', form)
-      setMsg('Booking request sent. We will contact you soon.')
-      setForm({ name:'', email:'', program:'Trial Class', message:'', timeslot:'Morning' })
-    } catch (e) {
-      setMsg(e.response?.data?.error || 'Failed to send booking')
-    } finally { setLoading(false) }
+      await api.post("/bookings", form);
+
+      setMsg(
+        "Booking request sent successfully. You will receive a call shortly from our team."
+      );
+
+      setForm({
+        name: "",
+        email: "",
+        phone: "",
+        instructor: "",
+        program: "Trial Class",
+        timeslot: "Morning",
+        message: "",
+      });
+    } catch (err) {
+      setMsg(err.response?.data?.error || "Failed to send booking request");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
-    <div className="max-w-md mx-auto px-4 py-8">
-      <h2 className="text-2xl font-semibold mb-4">Book a Trial Class</h2>
-      {msg && <div className="mb-4 text-sm">{msg}</div>}
-      <form onSubmit={submit} className="space-y-3 bg-white p-6 rounded shadow">
-        <input value={form.name} onChange={e=>setForm({...form, name:e.target.value})} placeholder="Name" className="w-full border px-3 py-2 rounded" required />
-        <input value={form.email} onChange={e=>setForm({...form, email:e.target.value})} type="email" placeholder="Email" className="w-full border px-3 py-2 rounded" required />
-        <select value={form.program} onChange={e=>setForm({...form, program:e.target.value})} className="w-full border px-3 py-2 rounded">
-          <option>Trial Class</option>
-          <option>Yoga Class</option>
-          <option>Meditation Session</option>
-        </select>
-        <select value={form.timeslot} onChange={e=>setForm({...form, timeslot:e.target.value})} className="w-full border px-3 py-2 rounded">
-          <option>Morning</option><option>Afternoon</option><option>Evening</option>
-        </select>
-        <textarea value={form.message} onChange={e=>setForm({...form, message:e.target.value})} placeholder="Message (optional)" className="w-full border px-3 py-2 rounded" rows="3"></textarea>
-        <button type="submit" className="w-full bg-primary text-white py-2 rounded" disabled={loading}>{loading ? 'Sending…' : 'Request Booking'}</button>
-      </form>
+    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-blue-50 to-purple-50 px-4 py-12">
+      <div className="max-w-md mx-auto">
+
+        <h2 className="text-3xl font-bold text-gray-800 mb-2 text-center">
+          Book a Trial Session
+        </h2>
+        <p className="text-gray-600 text-center mb-6">
+          Fill in the details and our team will contact you shortly.
+        </p>
+
+        {msg && (
+          <div className="mb-4 text-sm text-center bg-teal-100 text-teal-800 px-4 py-3 rounded-lg">
+            {msg}
+          </div>
+        )}
+
+        <form
+          onSubmit={submit}
+          className="bg-white p-6 rounded-2xl shadow-lg space-y-4"
+        >
+          {/* Name */}
+          <input
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            placeholder="Full Name"
+            className="w-full border px-3 py-2 rounded-lg"
+            required
+          />
+
+          {/* Email */}
+          <input
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+            type="email"
+            placeholder="Email Address"
+            className="w-full border px-3 py-2 rounded-lg"
+            required
+          />
+
+          {/* Phone */}
+          <input
+            value={form.phone}
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+            type="tel"
+            placeholder="Phone Number"
+            className="w-full border px-3 py-2 rounded-lg"
+          />
+
+          {/* Instructor */}
+          <select
+            value={form.instructor}
+            onChange={(e) => setForm({ ...form, instructor: e.target.value })}
+            className="w-full border px-3 py-2 rounded-lg"
+          >
+            <option value="">Select Instructor (Optional)</option>
+            {INSTRUCTORS.map((ins) => (
+              <option key={ins} value={ins}>
+                {ins}
+              </option>
+            ))}
+          </select>
+
+          {/* Program */}
+          <select
+            value={form.program}
+            onChange={(e) => setForm({ ...form, program: e.target.value })}
+            className="w-full border px-3 py-2 rounded-lg"
+          >
+            <option>Trial Class</option>
+            <option>Yoga Class</option>
+            <option>Meditation Session</option>
+          </select>
+
+          {/* Timeslot */}
+          <select
+            value={form.timeslot}
+            onChange={(e) => setForm({ ...form, timeslot: e.target.value })}
+            className="w-full border px-3 py-2 rounded-lg"
+          >
+            <option>Morning</option>
+            <option>Afternoon</option>
+            <option>Evening</option>
+          </select>
+
+          {/* Message */}
+          <textarea
+            value={form.message}
+            onChange={(e) => setForm({ ...form, message: e.target.value })}
+            placeholder="Message (optional)"
+            className="w-full border px-3 py-2 rounded-lg"
+            rows="3"
+          />
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-teal-500 to-blue-500 text-white py-3 rounded-xl font-semibold hover:from-teal-600 hover:to-blue-600 transition-all disabled:opacity-60"
+          >
+            {loading ? "Sending..." : "Request Booking"}
+          </button>
+        </form>
+      </div>
     </div>
-  )
+  );
 }

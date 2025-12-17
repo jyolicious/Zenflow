@@ -10,6 +10,9 @@ import instructorsRoutes from "./routes/instructors.js";
 import newslettersRoutes from "./routes/newsletters.js";
 import authRoutes from "./routes/auth.js";
 import newsRoutes from "./routes/news.js";
+import bookingsRoutes from "./routes/bookings.js";
+
+
 
 dotenv.config();
 
@@ -26,6 +29,7 @@ app.use("/api/instructors", instructorsRoutes);
 app.use("/api/newsletters", newslettersRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/news", newsRoutes);
+app.use("/api/bookings", bookingsRoutes);
 
 const PORT = process.env.PORT || 4000;
 
